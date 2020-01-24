@@ -1,38 +1,58 @@
 const executaQuery = require('../database/queries')
 
 class Pet {
-  lista(res) {
-    const sql = 'SELECT * FROM Pets'
+  lista() {
+    const sql = 'SELECT Pets.*, Clientes.nome as nomeDono, Clientes.cpf, Clientes.id as donoId FROM Pets INNER JOIN Clientes ON Pets.donoID = Clientes.iD'
 
-    executaQuery(res, sql)
+    return executaQuery(sql).then(pets =>
+      pets.map( pet =>({
+        id: pet.id,
+        nome: pet.id,
+        tipo: pet.tipo,
+        observacoes: pet.observacoes,
+        dono: {
+          cpf: pet.cpf,
+          nome: pet.nomeDono,
+          id: pet.donoId
+        }
+    
+      })
+      ))
   }
 
-  buscaPorId(res, id) {
+  buscaPorId(id) {
     const sql = `SELECT * FROM Pets WHERE id=${parseInt(id)}`
 
-    executaQuery(res, sql)
+    return executaQuery(sql)
   }
 
-  adiciona(res, item) {
-    const { nome, dono, tipo, observacoes } = item
+  adiciona(item) {
+    const { nome, donoId, tipo, observacoes } = item
 
-    const sql = `INSERT INTO Pets(nome, donoId, tipo, observacoes) VALUES('${nome}', ${dono}, '${tipo}', '${observacoes}')`
+    const sql = `INSERT INTO Pets(nome, donoId, tipo, observacoes) VALUES('${nome}', ${donoId}, '${tipo}', '${observacoes}')`
 
-    executaQuery(res, sql)
+    return executaQuery(sql).then(coisa => ({
+      nome,
+      donoId,
+      tipo,
+      observacoes,
+      id : coisa.insertId
+    }))
+
   }
 
-  atualiza(res, novoItem, id) {
+  atualiza(novoItem, id) {
     const { nome, dono, tipo, observacoes } = novoItem
 
     const sql = `UPDATE Pets SET nome='${nome}', donoId=${dono}, tipo='${tipo}', observacoes='${observacoes}' WHERE id=${id}`
 
-    executaQuery(res, sql)
+    return executaQuery(sql)
   }
 
-  deleta(res, id) {
+  deleta(id) {
     const sql = `DELETE FROM Pets WHERE id=${id}`
 
-    executaQuery(res, sql)
+    return executaQuery(sql)
   }
 }
 
